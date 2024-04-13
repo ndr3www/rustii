@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "image.jpeg", "image.txt"]);
+        let cli = Cli::parse_from([APP_NAME, "render", "image_dark.png", "image.txt"]);
         
         match &cli.command {
             Commands::Render { input_file_path, output_file_path, scale_width, scale_height } => {
