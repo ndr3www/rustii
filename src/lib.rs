@@ -5,6 +5,8 @@ use std::str;
 
 use clap::{Parser, Subcommand};
 use image::{imageops::FilterType::Triangle, io::Reader as ImageReader, DynamicImage, GenericImageView, Pixel};
+use miniz_oxide::deflate::compress_to_vec;
+use miniz_oxide::inflate::decompress_to_vec;
 
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -67,7 +69,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale_width: 
             Triangle
         );
 
-    let ascii_img = convert_to_ascii(img_decoded);
+    let ascii_img = compress_to_vec(&convert_to_ascii(img_decoded), 10);
 
     let mut output_file = match File::create(output_file_path) {
         Ok(f) => f,
@@ -109,6 +111,42 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 }
 
 pub fn play(input_file_path: &String) -> Result<(), &'static str> {
+    let mut input_file = match File::open(input_file_path) {
+        Ok(f) => f,
+        Err(e) => {
+            let s: &'static str = format!("{input_file_path}: {e}").leak();
+            return Err(s);
+        }
+    };
+
+    let mut contents = Vec::new();
+
+    match input_file.read_to_end(&mut contents) {
+        Ok(_) => (),
+        Err(e) => {
+            let s: &'static str = format!("{input_file_path}: {e}").leak();
+            return Err(s);
+        }
+    };
+
+    let contents_decompressed = match decompress_to_vec(contents.as_slice()) {
+        Ok(c) => c,
+        Err(e) => {
+            let s: &'static str = format!("{e}").leak();
+            return Err(s);
+        }
+    };
+
+    let contents_str = match str::from_utf8(&contents_decompressed) {
+        Ok(c) => c,
+        Err(e) => {
+            let s: &'static str = format!("{e}").leak();
+            return Err(s);
+        }
+    };
+
+    println!("{contents_str}");
+
     Ok(())
 }
 
