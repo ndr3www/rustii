@@ -1,7 +1,9 @@
+use std::process;
+
 use clap::{Parser, Subcommand};
 use image::{io::Reader as ImageReader, GenericImageView, Pixel};
 
-pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
+const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -61,6 +63,11 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &f32) 
 
 pub fn play(input_file_path: &String) -> Result<(), &'static str> {
     Ok(())
+}
+
+pub fn handle_error(error: &str, code: i32) {
+    eprintln!("{APP_NAME}: {error}");
+    process::exit(code);
 }
 
 #[cfg(test)]

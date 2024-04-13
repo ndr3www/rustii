@@ -1,8 +1,4 @@
-use std::process;
-
 use clap::Parser;
-
-use rustii::APP_NAME;
 
 fn main() {
     let cli = rustii::Cli::parse();
@@ -11,20 +7,16 @@ fn main() {
         rustii::Commands::Render { input_file_path, output_file_path, scale } => {
             match rustii::render(&input_file_path, &output_file_path, &scale) {
                 Ok(_) => (),
-                Err(e) => handle_error(e)
+                Err(e) => rustii::handle_error(e, 1)
             };
         },
 
         rustii::Commands::Play { input_file_path } => {
             match rustii::play(&input_file_path) {
                 Ok(_) => (),
-                Err(e) => handle_error(e)
+                Err(e) => rustii::handle_error(e, 2)
             };
         }
     };
 }
 
-fn handle_error(error: &str) {
-    eprintln!("{APP_NAME}: {error}");
-    process::exit(1);
-}
