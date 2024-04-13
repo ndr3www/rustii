@@ -4,8 +4,8 @@ fn main() {
     let cli = rustii::Cli::parse();
 
     match &cli.command {
-        rustii::Commands::Render { input_file_path, output_file_path, scale } => {
-            match rustii::render(&input_file_path, &output_file_path, &scale) {
+        rustii::Commands::Render { input_file_path, output_file_path, scale_width, scale_height } => {
+            match rustii::render(&input_file_path, &output_file_path, &scale_width, &scale_height) {
                 Ok(_) => (),
                 Err(e) => rustii::handle_error(e, 1)
             };
