@@ -8,3 +8,4 @@ description = "Converts images and videos to ASCII art"
 
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
+image = "0.25.1"

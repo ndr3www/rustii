@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use image::{io::Reader as ImageReader, GenericImageView, Pixel};
 
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -30,12 +31,36 @@ pub enum Commands {
     }
 }
 
-pub fn render(input_file_path: &String, output_file_path: &String, scale: &f32) {
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &f32) -> Result<(), &'static str> {
+    let img = match ImageReader::open(input_file_path) {
+        Ok(i) => i,
+        Err(e) => {
+            let s: &'static str = format!("{e}: {input_file_path}").leak();
+            return Err(s);
+        }
+    };
 
+    let img_decoded = match img.decode() {
+        Ok(i) => i,
+        Err(e) => {
+            let s: &'static str = format!("{e}").leak();
+            return Err(s);
+        }
+    };
+
+    for x in 0..img_decoded.width() {
+        for y in 0..img_decoded.height() {
+            for i in img_decoded.get_pixel(x, y).channels().iter() {
+                println!("{i}");
+            }
+        }
+    }
+
+    Ok(())
 }
 
-pub fn play(input_file_path: &String) {
-
+pub fn play(input_file_path: &String) -> Result<(), &'static str> {
+    Ok(())
 }
 
 #[cfg(test)]
