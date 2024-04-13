@@ -76,13 +76,11 @@ mod tests {
 
     #[test]
     fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "image.txt"]);
+        let cli = Cli::parse_from([APP_NAME, "render", "image.jpeg", "image.txt"]);
         
         match &cli.command {
             Commands::Render { input_file_path, output_file_path, scale } => {
-                assert_eq!(input_file_path, &"image.png".to_string());
-                assert_eq!(output_file_path, &"image.txt".to_string());
-                assert_eq!(scale, &1.0);
+                assert_eq!(render(input_file_path, output_file_path, scale), Ok(()));
             },
             _ => ()
         };
@@ -94,7 +92,7 @@ mod tests {
         
         match &cli.command {
             Commands::Play { input_file_path } => {
-                assert_eq!(input_file_path, &"image.txt".to_string());
+                assert_eq!(play(input_file_path), Ok(()));
             },
             _ => ()
         };
