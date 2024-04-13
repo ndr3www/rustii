@@ -15,16 +15,18 @@ enum Commands {
     /// Render specified media file to ASCII art
     Render {
         /// Image or video to be rendered
-        input_file_path: Option<String>,
+        input_file_path: String,
         /// ASCII art file path
-        output_file_path: Option<String>,
-        /// Scale of the final ASCII art, default is 1.0
-        scale: Option<f32>
+        output_file_path: String,
+        /// Scale of the final ASCII art as a floating point number
+        #[arg(value_parser = clap::value_parser!(f32))]
+        #[arg(default_value_t = 1.0)]
+        scale: f32
     },
     /// Play specified ASCII art in terminal
     Play {
         /// ASCII image or video to be played
-        input_file_path: Option<String>
+        input_file_path: String
     }
 }
 
@@ -34,13 +36,13 @@ mod tests {
 
     #[test]
     fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "image.txt", "1.0"]);
+        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "image.txt"]);
         
         match &cli.command {
             Commands::Render { input_file_path, output_file_path, scale } => {
-                assert_eq!(input_file_path, &Some("image.png".to_string()));
-                assert_eq!(output_file_path, &Some("image.txt".to_string()));
-                assert_eq!(scale, &Some(1.0));
+                assert_eq!(input_file_path, &"image.png".to_string());
+                assert_eq!(output_file_path, &"image.txt".to_string());
+                assert_eq!(scale, &1.0);
             },
             _ => ()
         };
@@ -52,7 +54,7 @@ mod tests {
         
         match &cli.command {
             Commands::Play { input_file_path } => {
-                assert_eq!(input_file_path, &Some("image.txt".to_string()));
+                assert_eq!(input_file_path, &"image.txt".to_string());
             },
             _ => ()
         };
