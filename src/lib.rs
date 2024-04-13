@@ -7,11 +7,11 @@ pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 #[command(propagate_version = true)]
 pub struct Cli {
     #[command(subcommand)]
-    command: Commands
+    pub command: Commands
 }
 
 #[derive(Subcommand)]
-enum Commands {
+pub enum Commands {
     /// Render specified media file to ASCII art
     Render {
         /// Image or video to be rendered
@@ -28,6 +28,14 @@ enum Commands {
         /// ASCII image or video to be played
         input_file_path: String
     }
+}
+
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &f32) {
+
+}
+
+pub fn play(input_file_path: &String) {
+
 }
 
 #[cfg(test)]
