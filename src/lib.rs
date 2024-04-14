@@ -24,7 +24,7 @@ pub struct Cli {
 /// List of available commands and options.
 #[derive(Subcommand)]
 pub enum Commands {
-    /// # Render specified media file to ASCII art
+    /// Render specified media file to ASCII art
     Render {
         /// Image or video to be rendered
         input_file_path: String,
@@ -42,7 +42,7 @@ pub enum Commands {
         #[arg(allow_hyphen_values = true)]
         contrast: f32
     },
-    /// # Play specified ASCII art in terminal
+    /// Play specified ASCII art in terminal
     Play {
         /// ASCII image or video to be played
         input_file_path: String
