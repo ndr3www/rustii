@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::str;
 
 use clap::{Parser, Subcommand};
-use image::{imageops::FilterType::Triangle, io::Reader as ImageReader, DynamicImage, GenericImageView, Pixel};
+use image::{imageops::FilterType, io::Reader as ImageReader, DynamicImage, GenericImageView, Pixel};
 use miniz_oxide::deflate::compress_to_vec;
 use miniz_oxide::inflate::decompress_to_vec;
 
@@ -35,7 +35,11 @@ pub enum Commands {
         /// Scale of the width of the final ASCII art as a floating point number
         #[arg(value_parser = clap::value_parser!(f32))]
         #[arg(default_value_t = 1.0)]
-        scale_height: f32
+        scale_height: f32,
+
+        #[arg(value_parser = clap::value_parser!(f32))]
+        #[arg(default_value_t = 0.0)]
+        contrast: f32
     },
     /// Play specified ASCII art in terminal
     Play {
@@ -44,7 +48,7 @@ pub enum Commands {
     }
 }
 
-pub fn render(input_file_path: &String, output_file_path: &String, scale_width: &f32, scale_height: &f32) -> Result<(), &'static str> {
+pub fn render(input_file_path: &String, output_file_path: &String, scale_width: &f32, scale_height: &f32, contrast: &f32) -> Result<(), &'static str> {
     let img = match ImageReader::open(input_file_path) {
         Ok(i) => i,
         Err(e) => {
@@ -62,12 +66,14 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale_width: 
     };
 
     img_decoded = img_decoded
-        .grayscale()
         .resize_exact(
             (img_decoded.width() as f32 * scale_width) as u32,
             (img_decoded.height() as f32 * scale_height) as u32,
-            Triangle
-        );
+            FilterType::Nearest
+        )
+        .grayscale()
+        .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
+        .adjust_contrast(contrast.to_owned());
 
     let ascii_img = compress_to_vec(&convert_to_ascii(img_decoded), 10);
 
@@ -164,8 +170,8 @@ mod tests {
         let cli = Cli::parse_from([APP_NAME, "render", "image.png", "img.txt", "0.5", "0.5"]);
         
         match &cli.command {
-            Commands::Render { input_file_path, output_file_path, scale_width, scale_height } => {
-                assert_eq!(render(input_file_path, output_file_path, scale_width, scale_height), Ok(()));
+            Commands::Render { input_file_path, output_file_path, scale_width, scale_height, contrast } => {
+                assert_eq!(render(input_file_path, output_file_path, scale_width, scale_height, contrast), Ok(()));
             },
             _ => ()
         };
