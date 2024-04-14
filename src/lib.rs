@@ -26,19 +26,18 @@ pub enum Commands {
     Render {
         /// Image or video to be rendered
         input_file_path: String,
-        /// ASCII art file path
-        output_file_path: String,
-        /// Scale of the width of the final ASCII art as a floating point number
-        #[arg(value_parser = clap::value_parser!(f32))]
-        #[arg(default_value_t = 1.0)]
-        scale_width: f32,
-        /// Scale of the width of the final ASCII art as a floating point number
-        #[arg(value_parser = clap::value_parser!(f32))]
-        #[arg(default_value_t = 1.0)]
-        scale_height: f32,
-
+        /// Produced ASCII art file
+        #[arg(short, long, value_name = "OUTPUT_FILE_PATH")]
+        output: String,
+        /// Scale of the produced ASCII art in order: <WIDTH_SCALE> <HEIGHT_SCALE>
+        #[arg(short, long, value_name = "FLOAT", value_parser, num_args = 2, value_delimiter = ' ')]
+        #[arg(default_values_t = [1.0, 1.0])]
+        scale: Vec<f32>,
+        /// Adjust the contrast of the produced ASCII art, negative values decrease the contrast and positive increase it
+        #[arg(short, long, value_name = "FLOAT")]
         #[arg(value_parser = clap::value_parser!(f32))]
         #[arg(default_value_t = 0.0)]
+        #[arg(allow_hyphen_values = true)]
         contrast: f32
     },
     /// Play specified ASCII art in terminal
@@ -48,7 +47,7 @@ pub enum Commands {
     }
 }
 
-pub fn render(input_file_path: &String, output_file_path: &String, scale_width: &f32, scale_height: &f32, contrast: &f32) -> Result<(), &'static str> {
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
     let img = match ImageReader::open(input_file_path) {
         Ok(i) => i,
         Err(e) => {
@@ -67,8 +66,8 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale_width: 
 
     img_decoded = img_decoded
         .resize_exact(
-            (img_decoded.width() as f32 * scale_width) as u32,
-            (img_decoded.height() as f32 * scale_height) as u32,
+            (img_decoded.width() as f32 * scale[0]) as u32,
+            (img_decoded.height() as f32 * scale[1]) as u32,
             FilterType::Nearest
         )
         .grayscale()
@@ -167,11 +166,11 @@ mod tests {
 
     #[test]
     fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "img.txt", "0.5", "0.5"]);
+        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "-o", "img.txt", "-s", "0.9", "0.3", "-c", "-10"]);
         
         match &cli.command {
-            Commands::Render { input_file_path, output_file_path, scale_width, scale_height, contrast } => {
-                assert_eq!(render(input_file_path, output_file_path, scale_width, scale_height, contrast), Ok(()));
+            Commands::Render { input_file_path, output, scale, contrast } => {
+                assert_eq!(render(input_file_path, output, scale, contrast), Ok(()));
             },
             _ => ()
         };
