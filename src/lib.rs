@@ -1,12 +1,14 @@
 use std::process;
 use std::fs::File;
 use std::io::prelude::*;
+use std::time::Duration;
 use std::str;
 
 use clap::{Parser, Subcommand};
 use image::{imageops::FilterType, io::Reader as ImageReader, DynamicImage, GenericImageView, Pixel};
 use miniz_oxide::deflate::compress_to_vec;
 use miniz_oxide::inflate::decompress_to_vec;
+use indicatif::ProgressBar;
 
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -71,6 +73,11 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    let spinner_img = ProgressBar::new_spinner();
+    spinner_img.set_message("Image processing: in progress");
+
+    spinner_img.enable_steady_tick(Duration::from_millis(100));
+    
     img_decoded = img_decoded
         .resize_exact(
             (img_decoded.width() as f32 * scale[0]) as u32,
@@ -81,7 +88,16 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
         .adjust_contrast(contrast.to_owned());
 
+    spinner_img.finish_with_message("Image processing: done");
+
+    let spinner_conv = ProgressBar::new_spinner();
+    spinner_conv.set_message("Conversion: in progress");
+
+    spinner_conv.enable_steady_tick(Duration::from_millis(100));
+
     let ascii_img = compress_to_vec(&convert_to_ascii(img_decoded), 10);
+
+    spinner_conv.finish_with_message("Conversion: done");
 
     let mut output_file = match File::create(output_file_path) {
         Ok(f) => f,
@@ -175,7 +191,7 @@ mod tests {
 
     #[test]
     fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "image.png", "-o", "img.txt", "-s", "0.9", "0.3", "-c", "-10"]);
+        let cli = Cli::parse_from([APP_NAME, "render", "avatar.jpg", "-o", "img.txt", "-s", "0.65", "0.25", "-c", "20"]);
         
         match &cli.command {
             Commands::Render { input_file_path, output, scale, contrast } => {
