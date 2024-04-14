@@ -51,6 +51,10 @@ pub enum Commands {
 
 /// Handles conversion of a given media file to ASCII art file.
 pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
+    if scale[0] < 0.0 || scale[1] < 0.0 {
+        return Err("Scale cannot be negative");
+    }
+
     let img = match ImageReader::open(input_file_path) {
         Ok(i) => i,
         Err(e) => {
@@ -66,10 +70,6 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
             return Err(s);
         }
     };
-
-    if scale[0] < 0.0 || scale[1] < 0.0 {
-        return Err("Scale cannot be negative");
-    }
 
     img_decoded = img_decoded
         .resize_exact(
