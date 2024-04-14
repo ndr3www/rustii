@@ -95,7 +95,10 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
 
     spinner_conv.enable_steady_tick(Duration::from_millis(100));
 
-    let ascii_img = compress_to_vec(&convert_to_ascii(img_decoded), 10);
+    let mut ascii_img = convert_to_ascii(img_decoded);
+    ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
+    
+    ascii_img = compress_to_vec(&ascii_img, 10);
 
     spinner_conv.finish_with_message("Conversion: done");
 
