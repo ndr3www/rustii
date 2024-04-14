@@ -67,6 +67,10 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    if scale[0] < 0.0 || scale[1] < 0.0 {
+        return Err("Scale cannot be negative");
+    }
+
     img_decoded = img_decoded
         .resize_exact(
             (img_decoded.width() as f32 * scale[0]) as u32,
