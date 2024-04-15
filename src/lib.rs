@@ -136,12 +136,12 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 
     for y in 0..image.height() {
         for x in 0..image.width() {
-            // Map SCII grayscale characters to pixel values
+            // Map ASCII grayscale characters to pixel values
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
-                                usize::try_from(image.get_pixel(x, y).channels()[0]).
-                                unwrap() / 4
+                                usize::try_from(image.get_pixel(x, y).channels()[0])
+                                .expect("Error converting `u8` to `usize` at `convert_to_ascii` functon") / 4
                              ]
             );
         }
