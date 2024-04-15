@@ -73,10 +73,10 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
-    let spinner_img = ProgressBar::new_spinner();
-    spinner_img.set_message("Image processing: in progress");
+    let mut spinner = ProgressBar::new_spinner();
+    spinner.set_message("Image processing: in progress");
 
-    spinner_img.enable_steady_tick(Duration::from_millis(100));
+    spinner.enable_steady_tick(Duration::from_millis(100));
     
     img_decoded = img_decoded
         .resize_exact(
@@ -88,19 +88,19 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
         .adjust_contrast(contrast.to_owned());
 
-    spinner_img.finish_with_message("Image processing: done");
+    spinner.finish_with_message("Image processing: done");
 
-    let spinner_conv = ProgressBar::new_spinner();
-    spinner_conv.set_message("Conversion: in progress");
+    spinner = ProgressBar::new_spinner();
+    spinner.set_message("Conversion: in progress");
 
-    spinner_conv.enable_steady_tick(Duration::from_millis(100));
+    spinner.enable_steady_tick(Duration::from_millis(100));
 
     let mut ascii_img = convert_to_ascii(img_decoded);
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
     
     ascii_img = compress_to_vec(&ascii_img, 10);
 
-    spinner_conv.finish_with_message("Conversion: done");
+    spinner.finish_with_message("Conversion: done");
 
     let mut output_file = match File::create(output_file_path) {
         Ok(f) => f,
@@ -161,7 +161,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
         }
     };
 
-    let contents_decompressed = match decompress_to_vec(contents.as_slice()) {
+    contents = match decompress_to_vec(contents.as_slice()) {
         Ok(c) => c,
         Err(e) => {
             let s: &'static str = format!("{e}").leak();
@@ -169,7 +169,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
         }
     };
 
-    let contents_str = match str::from_utf8(&contents_decompressed) {
+    let contents_str = match str::from_utf8(&contents) {
         Ok(c) => c,
         Err(e) => {
             let s: &'static str = format!("{e}").leak();
