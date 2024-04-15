@@ -53,10 +53,12 @@ pub enum Commands {
 
 /// Handles conversion of a given media file to ASCII art file
 pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
+    // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
         return Err("Scale cannot be negative");
     }
 
+    // Read raw image data from the file
     let img = match ImageReader::open(input_file_path) {
         Ok(i) => i,
         Err(e) => {
@@ -65,6 +67,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    // Decode the raw image
     let mut img_decoded = match img.decode() {
         Ok(i) => i,
         Err(e) => {
@@ -73,11 +76,12 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    // Set up and enable progress indicator
     let mut spinner = ProgressBar::new_spinner();
     spinner.set_message("Image processing: in progress");
-
     spinner.enable_steady_tick(Duration::from_millis(100));
     
+    // Image processing
     img_decoded = img_decoded
         .resize_exact(
             (img_decoded.width() as f32 * scale[0]) as u32,
@@ -88,20 +92,25 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
         .adjust_contrast(contrast.to_owned());
 
+    // Disable progress indicator
     spinner.finish_with_message("Image processing: done");
 
+    // Set up and enable a new progress indicator
     spinner = ProgressBar::new_spinner();
     spinner.set_message("Conversion: in progress");
-
     spinner.enable_steady_tick(Duration::from_millis(100));
 
+    // Conversion to ASCII art
     let mut ascii_img = convert_to_ascii(img_decoded);
+    // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
-    
+    // Compression
     ascii_img = compress_to_vec(&ascii_img, 10);
 
+    // Disable progress indicator
     spinner.finish_with_message("Conversion: done");
 
+    // Create/open the output file for writing
     let mut output_file = match File::create(output_file_path) {
         Ok(f) => f,
         Err(e) => {
@@ -110,6 +119,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    // Write data to the output file
     match output_file.write_all(&ascii_img) {
         Ok(_) => (),
         Err(e) => {
@@ -126,6 +136,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 
     for y in 0..image.height() {
         for x in 0..image.width() {
+            // Map pixel values to ASCII grayscale characters
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
@@ -135,6 +146,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
             );
         }
 
+        // Add newline at the end
         ascii_image.push('\n' as u8);
     }
 
@@ -143,6 +155,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 
 /// Reads the contents of a given ASCII art file and prints it to the standard output
 pub fn play(input_file_path: &String) -> Result<(), &'static str> {
+    // Open the file containing compressed ASCII art
     let mut input_file = match File::open(input_file_path) {
         Ok(f) => f,
         Err(e) => {
@@ -153,6 +166,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
 
     let mut contents = Vec::new();
 
+    // Read the contents of the file
     match input_file.read_to_end(&mut contents) {
         Ok(_) => (),
         Err(e) => {
@@ -161,6 +175,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
         }
     };
 
+    // Decompress read data
     contents = match decompress_to_vec(contents.as_slice()) {
         Ok(c) => c,
         Err(e) => {
@@ -169,6 +184,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
         }
     };
 
+    // Decode the data as string
     let contents_str = match str::from_utf8(&contents) {
         Ok(c) => c,
         Err(e) => {
@@ -177,6 +193,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
         }
     };
 
+    // Print the string to the standard output
     println!("{contents_str}");
 
     Ok(())
