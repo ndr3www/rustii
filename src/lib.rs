@@ -14,7 +14,7 @@ const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 const GRAYSCALE: &str = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 
-/// Handles parsing of command line arguments.
+/// Handles parsing of command line arguments
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
@@ -23,7 +23,7 @@ pub struct Cli {
     pub command: Commands
 }
 
-/// List of available commands and options.
+/// List of available commands and options
 #[derive(Subcommand)]
 pub enum Commands {
     /// Render specified media file to ASCII art
@@ -51,7 +51,7 @@ pub enum Commands {
     }
 }
 
-/// Handles conversion of a given media file to ASCII art file.
+/// Handles conversion of a given media file to ASCII art file
 pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
     if scale[0] < 0.0 || scale[1] < 0.0 {
         return Err("Scale cannot be negative");
@@ -141,7 +141,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
     ascii_image
 }
 
-/// Reads the contents of a given ASCII art file and prints it to the standard output.
+/// Reads the contents of a given ASCII art file and prints it to the standard output
 pub fn play(input_file_path: &String) -> Result<(), &'static str> {
     let mut input_file = match File::open(input_file_path) {
         Ok(f) => f,
@@ -182,7 +182,7 @@ pub fn play(input_file_path: &String) -> Result<(), &'static str> {
     Ok(())
 }
 
-/// Prints given error message to the standard error with application name and then exits the application with specified error code.
+/// Prints given error message to the standard error with application name and then exits the application with specified error code
 pub fn handle_error(error: &str, code: i32) {
     eprintln!("{APP_NAME}: {error}");
     process::exit(code);
