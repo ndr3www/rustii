@@ -136,7 +136,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 
     for y in 0..image.height() {
         for x in 0..image.width() {
-            // Map pixel values to ASCII grayscale characters
+            // Map SCII grayscale characters to pixel values
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
