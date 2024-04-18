@@ -20,7 +20,13 @@ const GRAYSCALE: &str = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+
 #[command(propagate_version = true)]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands
+    command: Commands
+}
+
+impl Cli {
+    pub fn get_command(&self) -> &Commands {
+        &self.command
+    }
 }
 
 /// List of available commands and options

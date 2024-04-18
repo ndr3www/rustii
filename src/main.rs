@@ -5,7 +5,7 @@ use rustii::*;
 fn main() {
     let cli = Cli::parse();
 
-    match &cli.command {
+    match cli.get_command() {
         Commands::Render { input_file_path, output, scale, contrast} => {
             match render(input_file_path, output, scale, contrast) {
                 Ok(_) => (),
