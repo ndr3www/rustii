@@ -77,7 +77,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     let mut img_decoded = match img.decode() {
         Ok(i) => i,
         Err(e) => {
-            let s: &'static str = format!("{e}").leak();
+            let s: &'static str = format!("{input_file_path}: {e}").leak();
             return Err(s);
         }
     };
