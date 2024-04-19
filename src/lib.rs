@@ -73,6 +73,11 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
+    // Set up and enable progress indicator
+    let mut spinner = ProgressBar::new_spinner();
+    spinner.set_message("Decoding: in progress");
+    spinner.enable_steady_tick(Duration::from_millis(100));
+
     // Decode the raw image
     let mut img_decoded = match img.decode() {
         Ok(i) => i,
@@ -82,9 +87,12 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
-    // Set up and enable progress indicator
-    let mut spinner = ProgressBar::new_spinner();
-    spinner.set_message("Image processing: in progress");
+    // Disable progress indicator
+    spinner.finish_with_message("Decoding: done");
+
+    // Set up and enable a new progress indicator
+    spinner = ProgressBar::new_spinner();
+    spinner.set_message("Processing: in progress");
     spinner.enable_steady_tick(Duration::from_millis(100));
     
     // Image processing
@@ -99,7 +107,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .adjust_contrast(contrast.to_owned());
 
     // Disable progress indicator
-    spinner.finish_with_message("Image processing: done");
+    spinner.finish_with_message("Processing: done");
 
     // Set up and enable a new progress indicator
     spinner = ProgressBar::new_spinner();
