@@ -32,9 +32,9 @@ impl Cli {
 /// List of available commands and options
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Render specified media file to ASCII art
+    /// Render specified image file to ASCII art
     Render {
-        /// Image or video to be rendered
+        /// Image file to be rendered
         input_file_path: String,
         /// Produced ASCII art file
         #[arg(short, long, value_name = "OUTPUT_FILE_PATH")]
@@ -50,14 +50,13 @@ pub enum Commands {
         #[arg(allow_hyphen_values = true)]
         contrast: f32
     },
-    /// Play specified ASCII art in terminal
-    Play {
-        /// ASCII image or video to be played
+    /// Open specified ASCII art file in terminal
+    Open {
         input_file_path: String
     }
 }
 
-/// Handles conversion of a given media file to ASCII art file
+/// Handles conversion of a given image file to ASCII art file
 pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
     // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
@@ -168,7 +167,7 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
 }
 
 /// Reads the contents of a given ASCII art file and prints it to the standard output
-pub fn play(input_file_path: &String) -> Result<(), &'static str> {
+pub fn open(input_file_path: &String) -> Result<(), &'static str> {
     // Open the file containing compressed ASCII art
     let mut input_file = match File::open(input_file_path) {
         Ok(f) => f,
@@ -237,11 +236,11 @@ mod tests {
 
     #[test]
     fn case_play() {
-        let cli = Cli::parse_from([APP_NAME, "play", "img.txt"]);
+        let cli = Cli::parse_from([APP_NAME, "open", "img.txt"]);
         
         match &cli.command {
-            Commands::Play { input_file_path } => {
-                assert_eq!(play(input_file_path), Ok(()));
+            Commands::Open { input_file_path } => {
+                assert_eq!(open(input_file_path), Ok(()));
             },
             _ => ()
         };

@@ -2,7 +2,7 @@
 name = "rustii"
 version = "0.1.0"
 edition = "2021"
-description = "Converts images and videos to ASCII art"
+description = "Converts images to ASCII art"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

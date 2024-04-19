@@ -13,8 +13,8 @@ fn main() {
             };
         },
 
-        Commands::Play { input_file_path } => {
-            match play(input_file_path) {
+        Commands::Open { input_file_path } => {
+            match open(input_file_path) {
                 Ok(_) => (),
                 Err(e) => handle_error(e, 2)
             };
