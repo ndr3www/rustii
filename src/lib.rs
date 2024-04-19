@@ -115,13 +115,23 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
 
     // Conversion to ASCII art
     let mut ascii_img = convert_to_ascii(img_decoded);
+
+    // Disable progress indicator
+    spinner.finish_with_message("Conversion: done");
+
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
+    
+    // Set up and enable a new progress indicator
+    spinner = ProgressBar::new_spinner();
+    spinner.set_message("Compression: in progress");
+    spinner.enable_steady_tick(Duration::from_millis(100));
+
     // Compression
     ascii_img = compress_to_vec(&ascii_img, 10);
 
     // Disable progress indicator
-    spinner.finish_with_message("Conversion: done");
+    spinner.finish_with_message("Compression: done");
 
     // Create/open the output file for writing
     let mut output_file = match File::create(output_file_path) {
