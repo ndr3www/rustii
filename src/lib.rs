@@ -121,7 +121,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     // Compression
     ascii_img = compress_to_vec(&ascii_img, 10);
 
-    // Disable progress indicator
+    // Disable the progress indicator
     spinner.finish_with_message("Done");
 
     // Create/open the output file for writing
