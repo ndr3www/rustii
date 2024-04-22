@@ -73,8 +73,8 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     };
 
     // Set up and enable progress indicator
-    let mut spinner = ProgressBar::new_spinner();
-    spinner.set_message("Decoding: in progress");
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_message("Decoding");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
     // Decode the raw image
@@ -86,12 +86,9 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
-    // Disable progress indicator
-    spinner.finish_with_message("Decoding: done");
-
-    // Set up and enable a new progress indicator
-    spinner = ProgressBar::new_spinner();
-    spinner.set_message("Processing: in progress");
+    // Set up and restart the progress indicator
+    spinner.reset();
+    spinner.set_message("Processing");
     spinner.enable_steady_tick(Duration::from_millis(100));
     
     // Image processing
@@ -105,33 +102,27 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
         .adjust_contrast(contrast.to_owned());
 
-    // Disable progress indicator
-    spinner.finish_with_message("Processing: done");
-
-    // Set up and enable a new progress indicator
-    spinner = ProgressBar::new_spinner();
-    spinner.set_message("Conversion: in progress");
+    // Set up and restart the progress indicator
+    spinner.reset();
+    spinner.set_message("Conversion");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
     // Conversion to ASCII art
     let mut ascii_img = convert_to_ascii(img_decoded);
 
-    // Disable progress indicator
-    spinner.finish_with_message("Conversion: done");
-
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
     
-    // Set up and enable a new progress indicator
-    spinner = ProgressBar::new_spinner();
-    spinner.set_message("Compression: in progress");
+    // Set up and restart the progress indicator
+    spinner.reset();
+    spinner.set_message("Compression");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
     // Compression
     ascii_img = compress_to_vec(&ascii_img, 10);
 
     // Disable progress indicator
-    spinner.finish_with_message("Compression: done");
+    spinner.finish_with_message("Done");
 
     // Create/open the output file for writing
     let mut output_file = match File::create(output_file_path) {
