@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 use image::{imageops::FilterType, io::Reader as ImageReader, DynamicImage, GenericImageView, Pixel};
 use miniz_oxide::deflate::compress_to_vec;
 use miniz_oxide::inflate::decompress_to_vec;
-use indicatif::ProgressBar;
+use indicatif::{ProgressBar, ProgressStyle};
 
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -73,7 +73,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     };
 
     // Set up and enable progress indicator
-    let spinner = ProgressBar::new_spinner();
+    let spinner = ProgressBar::new_spinner().with_style(ProgressStyle::tick_chars(ProgressStyle::default_spinner(), "|/—\\ "));
     spinner.set_message("Decoding");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
