@@ -14,6 +14,8 @@ const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 const GRAYSCALE: &str = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 
+const SPINNER_TICK: u64 = 80;
+
 /// Handles parsing of command line arguments
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -73,10 +75,30 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     };
 
     // Set up and enable progress indicator
-    let spinner = ProgressBar::new_spinner().with_style(ProgressStyle::tick_chars(ProgressStyle::default_spinner(), "|/—\\ "));
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(ProgressStyle::with_template("{spinner:.default} {msg}").unwrap().tick_strings(&[
+                        "[    ]",
+                        "[=   ]",
+                        "[==  ]",
+                        "[=== ]",
+                        "[====]",
+                        "[ ===]",
+                        "[  ==]",
+                        "[   =]",
+                        "[    ]",
+                        "[   =]",
+                        "[  ==]",
+                        "[ ===]",
+                        "[====]",
+                        "[=== ]",
+                        "[==  ]",
+                        "[=   ]",
+                        "[====]"
+                        ])
+                      );
     spinner.set_message("Decoding");
-    spinner.enable_steady_tick(Duration::from_millis(100));
-
+    spinner.enable_steady_tick(Duration::from_millis(SPINNER_TICK));
+    
     // Decode the raw image
     let mut img_decoded = match img.decode() {
         Ok(i) => i,
@@ -86,10 +108,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         }
     };
 
-    // Set up and restart the progress indicator
-    spinner.reset();
     spinner.set_message("Processing");
-    spinner.enable_steady_tick(Duration::from_millis(100));
     
     // Image processing
     img_decoded = img_decoded
@@ -102,10 +121,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
         .filter3x3(&[0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0])
         .adjust_contrast(contrast.to_owned());
 
-    // Set up and restart the progress indicator
-    spinner.reset();
     spinner.set_message("Conversion");
-    spinner.enable_steady_tick(Duration::from_millis(100));
 
     // Conversion to ASCII art
     let mut ascii_img = convert_to_ascii(img_decoded);
@@ -113,10 +129,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
     
-    // Set up and restart the progress indicator
-    spinner.reset();
     spinner.set_message("Compression");
-    spinner.enable_steady_tick(Duration::from_millis(100));
 
     // Compression
     ascii_img = compress_to_vec(&ascii_img, 10);
