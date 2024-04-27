@@ -249,7 +249,7 @@ mod tests {
     }
 
     #[test]
-    fn case_play() {
+    fn case_open() {
         let cli = Cli::parse_from([APP_NAME, "open", "./tests/img.txt"]);
         
         match cli.get_command() {
