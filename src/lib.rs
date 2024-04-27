@@ -59,20 +59,14 @@ pub enum Commands {
 }
 
 /// Handles conversion of a given image file to ASCII art file
-pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32], contrast: &f32) -> Result<(), String> {
     // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
-        return Err("Scale cannot be negative");
+        return Err(String::from("Scale cannot be negative"));
     }
 
     // Read raw image data from the file
-    let img = match ImageReader::open(input_file_path) {
-        Ok(i) => i,
-        Err(e) => {
-            let s: &'static str = format!("{input_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    let img = ImageReader::open(input_file_path).map_err(|e| format!("{input_file_path}: {e}"))?;
 
     // Set up and enable progress indicator
     let spinner = ProgressBar::new_spinner();
@@ -98,18 +92,12 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
                       );
     spinner.set_message("Decoding");
     spinner.enable_steady_tick(Duration::from_millis(SPINNER_TICK));
-    
+
     // Decode the raw image
-    let mut img_decoded = match img.decode() {
-        Ok(i) => i,
-        Err(e) => {
-            let s: &'static str = format!("{input_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    let mut img_decoded = img.decode().map_err(|e| format!("{input_file_path}: {e}"))?;
 
     spinner.set_message("Processing");
-    
+
     // Image processing
     img_decoded = img_decoded
         .resize_exact(
@@ -128,7 +116,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
 
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
-    
+
     spinner.set_message("Compression");
 
     // Compression
@@ -138,22 +126,10 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     spinner.finish_with_message("Done");
 
     // Create/open the output file for writing
-    let mut output_file = match File::create(output_file_path) {
-        Ok(f) => f,
-        Err(e) => {
-            let s: &'static str = format!("{output_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    let mut output_file = File::create(output_file_path).map_err(|e| format!("{output_file_path}: {e}"))?;
 
     // Write data to the output file
-    match output_file.write_all(&ascii_img) {
-        Ok(_) => (),
-        Err(e) => {
-            let s: &'static str = format!("{output_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    output_file.write_all(&ascii_img).map_err(|e| format!("{output_file_path}: {e}"))?;
 
     Ok(())
 }
@@ -167,58 +143,33 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
-                                usize::try_from(image.get_pixel(x, y).channels()[0])
-                                .expect("Error converting `u8` to `usize` at `convert_to_ascii` functon") / 4
+                                usize::from(image.get_pixel(x, y).channels()[0]) / 4
                              ]
             );
         }
 
         // Add newline at the end
-        ascii_image.push('\n' as u8);
+        ascii_image.push(b'\n');
     }
 
     ascii_image
 }
 
 /// Reads the contents of a given ASCII art file and prints it to the standard output
-pub fn open(input_file_path: &String) -> Result<(), &'static str> {
+pub fn open(input_file_path: &String) -> Result<(), String> {
     // Open the file containing compressed ASCII art
-    let mut input_file = match File::open(input_file_path) {
-        Ok(f) => f,
-        Err(e) => {
-            let s: &'static str = format!("{input_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    let mut input_file = File::open(input_file_path).map_err(|e| format!("{input_file_path}: {e}"))?;
 
     let mut contents = Vec::new();
 
     // Read the contents of the file
-    match input_file.read_to_end(&mut contents) {
-        Ok(_) => (),
-        Err(e) => {
-            let s: &'static str = format!("{input_file_path}: {e}").leak();
-            return Err(s);
-        }
-    };
+    input_file.read_to_end(&mut contents).map_err(|e| format!("{input_file_path}: {e}"))?;
 
     // Decompress read data
-    contents = match decompress_to_vec(contents.as_slice()) {
-        Ok(c) => c,
-        Err(e) => {
-            let s: &'static str = format!("{e}").leak();
-            return Err(s);
-        }
-    };
+    contents = decompress_to_vec(&contents).map_err(|e| format!("{e}"))?;
 
     // Decode the data as string
-    let contents_str = match str::from_utf8(&contents) {
-        Ok(c) => c,
-        Err(e) => {
-            let s: &'static str = format!("{e}").leak();
-            return Err(s);
-        }
-    };
+    let contents_str = str::from_utf8(&contents).map_err(|e| format!("{e}"))?;
 
     // Print the string to the standard output
     println!("{contents_str}");
