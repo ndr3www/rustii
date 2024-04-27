@@ -10,7 +10,7 @@ use miniz_oxide::deflate::compress_to_vec;
 use miniz_oxide::inflate::decompress_to_vec;
 use indicatif::{ProgressBar, ProgressStyle};
 
-const APP_NAME: &str = env!("CARGO_PKG_NAME");
+pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 const GRAYSCALE: &str = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 
@@ -232,31 +232,3 @@ pub fn handle_error(error: &str, code: i32) {
     process::exit(code);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn case_render() {
-        let cli = Cli::parse_from([APP_NAME, "render", "./tests/image.jpg", "-o", "./tests/ascii.txt", "-s", "0.65", "0.25", "-c", "20"]);
-        
-        match cli.get_command() {
-            Commands::Render { input_file_path, output, scale, contrast } => {
-                assert_eq!(render(input_file_path, output, scale, contrast), Ok(()));
-            },
-            _ => ()
-        };
-    }
-
-    #[test]
-    fn case_open() {
-        let cli = Cli::parse_from([APP_NAME, "open", "./tests/ascii.txt"]);
-        
-        match cli.get_command() {
-            Commands::Open { input_file_path } => {
-                assert_eq!(open(input_file_path), Ok(()));
-            },
-            _ => ()
-        };
-    }
-}
