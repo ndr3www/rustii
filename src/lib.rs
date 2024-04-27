@@ -240,7 +240,7 @@ mod tests {
     fn case_render() {
         let cli = Cli::parse_from([APP_NAME, "render", "./tests/avatar.jpg", "-o", "./tests/img.txt", "-s", "0.65", "0.25", "-c", "20"]);
         
-        match &cli.command {
+        match cli.get_command() {
             Commands::Render { input_file_path, output, scale, contrast } => {
                 assert_eq!(render(input_file_path, output, scale, contrast), Ok(()));
             },
@@ -252,7 +252,7 @@ mod tests {
     fn case_play() {
         let cli = Cli::parse_from([APP_NAME, "open", "./tests/img.txt"]);
         
-        match &cli.command {
+        match cli.get_command() {
             Commands::Open { input_file_path } => {
                 assert_eq!(open(input_file_path), Ok(()));
             },
