@@ -26,7 +26,8 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn get_command(&self) -> &Commands {
+    #[must_use]
+    pub const fn get_command(&self) -> &Commands {
         &self.command
     }
 }
@@ -44,7 +45,7 @@ pub enum Commands {
         /// Scale of the produced ASCII art in order: <WIDTH_SCALE> <HEIGHT_SCALE>
         #[arg(short, long, value_name = "FLOAT", value_parser, num_args = 2, value_delimiter = ' ')]
         #[arg(default_values_t = [1.0, 1.0])]
-        scale: Vec<f32>,
+        scale: Vec<f64>,
         /// Adjust the contrast of the produced ASCII art, negative values decrease the contrast and positive increase it
         #[arg(short, long, value_name = "FLOAT")]
         #[arg(value_parser = clap::value_parser!(f32))]
@@ -59,7 +60,18 @@ pub enum Commands {
 }
 
 /// Handles conversion of a given image file to ASCII art file
-pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
+/// # Errors
+///
+/// Will return `Err` if the scale is negative
+/// or if the file does not exist
+/// or if an unsupported image file is pass in
+/// or if it is unable to create a new file
+/// or if it is unable to write to the new file
+///
+/// # Panics
+///
+/// Will Panic if the loading bar fails to work
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f64], contrast: &f32) -> Result<(), &'static str> {
     // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
         return Err("Scale cannot be negative");
@@ -76,7 +88,9 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
 
     // Set up and enable progress indicator
     let spinner = ProgressBar::new_spinner();
-    spinner.set_style(ProgressStyle::with_template("{spinner:.default} {msg}").unwrap().tick_strings(&[
+    spinner.set_style(ProgressStyle::with_template("{spinner:.default} {msg}")
+        .expect("Error starting the loading bar")
+        .tick_strings(&[
                         "[    ]",
                         "[=   ]",
                         "[==  ]",
@@ -113,8 +127,8 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     // Image processing
     img_decoded = img_decoded
         .resize_exact(
-            (img_decoded.width() as f32 * scale[0]) as u32,
-            (img_decoded.height() as f32 * scale[1]) as u32,
+            f64_to_u32(f64::from(img_decoded.width()) * scale[0].round()).expect("Width was less than 0"),
+            f64_to_u32(f64::from(img_decoded.height()) * scale[1].round()).expect("Height was less than 0"),
             FilterType::Nearest
         )
         .grayscale()
@@ -124,7 +138,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     spinner.set_message("Conversion");
 
     // Conversion to ASCII art
-    let mut ascii_img = convert_to_ascii(img_decoded);
+    let mut ascii_img = convert_to_ascii(&img_decoded);
 
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
@@ -148,7 +162,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
 
     // Write data to the output file
     match output_file.write_all(&ascii_img) {
-        Ok(_) => (),
+        Ok(()) => (),
         Err(e) => {
             let s: &'static str = format!("{output_file_path}: {e}").leak();
             return Err(s);
@@ -158,7 +172,18 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f
     Ok(())
 }
 
-fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
+/// Private function to convert to while
+/// minimizing data loss and catching sign loss
+fn f64_to_u32(float: f64) -> Result<u32, String> {
+    if float < 0.0 {
+        Err("Number less than 0 passed in".to_owned())
+    } else {
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+        Ok(float.round() as u32)
+    }
+}
+
+fn convert_to_ascii(image: &DynamicImage) -> Vec<u8> {
     let mut ascii_image = Vec::new();
 
     for y in 0..image.height() {
@@ -167,20 +192,24 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
-                                usize::try_from(image.get_pixel(x, y).channels()[0])
-                                .expect("Error converting `u8` to `usize` at `convert_to_ascii` functon") / 4
+                                usize::from(image.get_pixel(x, y).channels()[0]) / 4
                              ]
             );
         }
 
         // Add newline at the end
-        ascii_image.push('\n' as u8);
+        ascii_image.push(b'\n');
     }
 
     ascii_image
 }
 
 /// Reads the contents of a given ASCII art file and prints it to the standard output
+/// # Errors
+///
+/// Will return `Err` if `input_file_path` does not exist or the user does not
+/// have permission to read it
+/// Or if there is a memory leak from usage of `decompress_to_vec` function
 pub fn open(input_file_path: &String) -> Result<(), &'static str> {
     // Open the file containing compressed ASCII art
     let mut input_file = match File::open(input_file_path) {

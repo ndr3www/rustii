@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use rustii::*;
+use rustii::{Cli, Commands, handle_error, open, render};
 
 fn main() {
     let cli = Cli::parse();
@@ -8,14 +8,14 @@ fn main() {
     match cli.get_command() {
         Commands::Render { input_file_path, output, scale, contrast } => {
             match render(input_file_path, output, scale, contrast) {
-                Ok(_) => (),
+                Ok(()) => (),
                 Err(e) => handle_error(e, 1)
             };
         },
 
         Commands::Open { input_file_path } => {
             match open(input_file_path) {
-                Ok(_) => (),
+                Ok(()) => (),
                 Err(e) => handle_error(e, 2)
             };
         }
