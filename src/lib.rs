@@ -59,7 +59,7 @@ pub enum Commands {
 }
 
 /// Handles conversion of a given image file to ASCII art file
-pub fn render(input_file_path: &String, output_file_path: &String, scale: &Vec<f32>, contrast: &f32) -> Result<(), &'static str> {
+pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32], contrast: &f32) -> Result<(), &'static str> {
     // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
         return Err("Scale cannot be negative");
@@ -167,14 +167,13 @@ fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
             ascii_image.push(GRAYSCALE
                              .as_bytes()
                              [
-                                usize::try_from(image.get_pixel(x, y).channels()[0])
-                                .expect("Error converting `u8` to `usize` at `convert_to_ascii` functon") / 4
+                                usize::from(image.get_pixel(x, y).channels()[0]) / 4
                              ]
             );
         }
 
         // Add newline at the end
-        ascii_image.push('\n' as u8);
+        ascii_image.push(b'\n');
     }
 
     ascii_image
