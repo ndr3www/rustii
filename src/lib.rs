@@ -178,7 +178,7 @@ pub fn open(input_file_path: &String) -> Result<(), String> {
 }
 
 /// Prints given error message to the standard error with application name and then exits the application with specified error code
-pub fn handle_error(error: &str, code: i32) {
+pub fn handle_error(error: String, code: i32) {
     eprintln!("{APP_NAME}: {error}");
     process::exit(code);
 }
