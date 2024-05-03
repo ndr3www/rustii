@@ -1,3 +1,5 @@
+#![allow(clippy::missing_errors_doc)]
+
 use std::process;
 use std::fs::File;
 use std::io::prelude::*;
@@ -26,6 +28,7 @@ pub struct Cli {
 }
 
 impl Cli {
+    #![allow(clippy::must_use_candidate)]
     pub fn get_command(&self) -> &Commands {
         &self.command
     }
@@ -59,6 +62,9 @@ pub enum Commands {
 }
 
 /// Handles conversion of a given image file to ASCII art file
+#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_precision_loss)]
 pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32], contrast: &f32) -> Result<(), String> {
     // Scale validation
     if scale[0] < 0.0 || scale[1] < 0.0 {
@@ -70,7 +76,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32]
 
     // Set up and enable progress indicator
     let spinner = ProgressBar::new_spinner();
-    spinner.set_style(ProgressStyle::with_template("{spinner:.default} {msg}").unwrap().tick_strings(&[
+    spinner.set_style(ProgressStyle::with_template("{spinner:.default} {msg}").map_err(|e| format!("{e}"))?.tick_strings(&[
                         "[    ]",
                         "[=   ]",
                         "[==  ]",
@@ -112,7 +118,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32]
     spinner.set_message("Conversion");
 
     // Conversion to ASCII art
-    let mut ascii_img = convert_to_ascii(img_decoded);
+    let mut ascii_img = convert_to_ascii(&img_decoded);
 
     // Add metadata
     ascii_img.append(&mut format!("Scale: {}, {}\nContrast: {contrast}", scale[0], scale[1]).as_bytes().to_vec());
@@ -134,7 +140,7 @@ pub fn render(input_file_path: &String, output_file_path: &String, scale: &[f32]
     Ok(())
 }
 
-fn convert_to_ascii(image: DynamicImage) -> Vec<u8> {
+fn convert_to_ascii(image: &DynamicImage) -> Vec<u8> {
     let mut ascii_image = Vec::new();
 
     for y in 0..image.height() {
@@ -178,7 +184,7 @@ pub fn open(input_file_path: &String) -> Result<(), String> {
 }
 
 /// Prints given error message to the standard error with application name and then exits the application with specified error code
-pub fn handle_error(error: String, code: i32) {
+pub fn handle_error(error: &str, code: i32) {
     eprintln!("{APP_NAME}: {error}");
     process::exit(code);
 }
