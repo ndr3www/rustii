@@ -10,9 +10,9 @@ keywords = ["ascii", "ascii-art", "cli", "text", "art"]
 categories = ["command-line-utilities", "computer-vision", "encoding", "multimedia::images"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.5.7", features = ["derive"] }
 image = "0.25.1"
-miniz_oxide = "0.7.2"
+miniz_oxide = "0.7.3"
 indicatif = "0.17.8"
 
 [lints.clippy]
