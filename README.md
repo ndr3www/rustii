@@ -1,12 +1,17 @@
 
 # Installation
 
-## Linux
+## Through cargo
+`cargo install rustii`
+
+## Manually
+
+### Linux
 Just download the appropriate binary from [latest release](https://github.com/ndr3www/rustii/releases/latest) and copy it to a directory specified in your `$PATH`, for example:
 
 `sudo cp rustii /usr/bin`
 
-## Windows
+### Windows
 1. Download **rustii.exe** from [latest release](https://github.com/ndr3www/rustii/releases/latest)
 2. Create a folder named **rustii** anywhere you like
 3. Copy **rustii.exe** to the newly created folder
