@@ -1,3 +1,11 @@
+<p align="center">
+  <a href="https://crates.io/crates/rustii">
+    <img alt="Crates.io downloads" src=https://img.shields.io/crates/d/rustii />
+  </a>
+  <a href="https://github.com/ndr3www/rustii/graphs/contributors">
+      <img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/ndr3www/rustii" />
+  </a>
+</p>
 
 # Installation
 
