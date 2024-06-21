@@ -1,8 +1,8 @@
 <p align="left">
   <a href="https://crates.io/crates/rustii">
     <img alt="Crates.io Version" src="https://img.shields.io/crates/v/rustii" />
+    <img alt="Crates.io Downloads" src=https://img.shields.io/crates/d/rustii />
   </a>
-  <img alt="Crates.io Downloads" src=https://img.shields.io/crates/d/rustii />
 </p>
 
 # Installation
