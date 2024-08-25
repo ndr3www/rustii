@@ -25,7 +25,6 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
  - OS: [e.g. Windows 10]
- - System/kernel version [e.g. 21H2 (in case of Windows) or 6.8.7 (in case of Linux)]
  - Architecture: [e.g. x86_64]
 
 **Additional context**
